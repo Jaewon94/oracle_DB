@@ -5,7 +5,7 @@ import java.text.SimpleDateFormat;
 
 public class Ex02 {
 	public static void main(String[] args) throws Exception {
-		String sql = "select sysdba from dual";
+		String sql = "select sysdate from dual";
 		String driverName = "oracle.jdbc.driver.OracleDriver";
 		String url ="jdbc:oracle:thin:@192.168.1.100:1521:xe";
 		String user = "c##itbank";
