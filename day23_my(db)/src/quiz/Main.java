@@ -4,6 +4,7 @@ import java.sql.Date;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Scanner;
 
 // 전체 목록 
@@ -20,11 +21,21 @@ public class Main {
 		ProductDAO dao = new ProductDAO();
 		ArrayList<ProductDTO> list;
 		ProductDTO dto = null;
-		String keyword;
+		String keyword, key, value;
 		int row, idx;
-
+		char yorn;
 		int menu;
+		HashMap<String, String> map = new HashMap<String, String>();
+		map.put("상품번호", "idx");
+		map.put("상품이름", "name");
+		map.put("상품가격", "price");
+		map.put("유통기한", "expiryDate");
+		map.put("상품 설명", "name");
 
+		String order = map.get("상품번호");
+		
+		boolean desc =false;
+		
 		while (true) {
 			System.out.println("1. 전체 목록 검색");
 			System.out.println("2. 단일 품목 검색");
@@ -40,7 +51,7 @@ public class Main {
 
 			switch (menu) {
 			case 1:
-				list = dao.selectAll();
+				list = dao.selectAll(order, desc);
 				list.forEach(d -> System.out.println(d));
 				break;
 			case 2:
@@ -53,28 +64,55 @@ public class Main {
 				break;
 			case 3:
 				// dao.insert(idx, name, price, expiryDate, memo); 변수가 많아지면 이렇게 하기 어려워짐
-				dto = makeDTO(sc);
+				dto = useBean(sc);
 				row = dao.insert(dto);
 				System.out.println(row != 0 ? "추가 성공" : "추가 실패");
 				break;
 			case 4:
-				
+				System.out.println("기존 상품을 수정합니다.");
+				dto = useBean(sc);
+				row = dao.update(dto);
+				System.out.println(row != 0 ? "수정 성공" : "수정 실패");
 				break;
-			case 5:
+			case 5:	// 상품의 번호를 입력받아서 해당 상품을 삭제하기
+				
 				System.out.print("삭제할 idx번호 : ");
 				idx = Integer.parseInt(sc.nextLine());
 				row = dao.delete(idx);
 				System.out.println(row != 0 ? "삭제 성공" : "삭제 실패");
 				break;
 			case 6:
-
+				System.out.print("전체 데이터를 삭제 하시겠습니까? (y or n) : ");
+				yorn = sc.nextLine().charAt(0);
+				
+				switch (yorn) {
+				case 'y':
+				case 'Y':
+					row = dao.deleteAll();
+					System.out.println("전체 삭제 성공!");
+					break;
+				case 'n':
+				case 'N':
+					System.out.println("전체 삭제를 취소");
+					break;
+				}
 				break;
 			case 7:
-
+				System.out.println(new ArrayList<>(map.keySet()));
+				System.out.print("정렬 기준 상태 : ");
+				key = sc.nextLine();
+				value = map.get(key);
+				
+				if(value != null) {
+					order = value;
+				}
+				System.out.print("내림차순? ");
+				desc = Boolean.parseBoolean(sc.nextLine());
+				
 				break;
 			case 0:
-
-				break;
+				System.out.println("프로그램을 종료합니다.");
+				return;
 
 			default:
 				System.out.println("메뉴를 잘못 입력하였습니다.");
@@ -82,8 +120,9 @@ public class Main {
 			}
 		}
 	}
-	static ProductDTO makeDTO(Scanner sc) {
-		System.out.println("신규 상품을 생성합니다.");
+	
+	// 추가에도 활용하고, 수정에서도 활용한다. (코드의 재활용, 함수)
+	static ProductDTO useBean(Scanner sc) {
 		ProductDTO dto = new ProductDTO();
 		System.out.print("상품 번호 : ");
 		dto.setIdx(Integer.parseInt(sc.nextLine()));
@@ -108,4 +147,6 @@ public class Main {
 		
 		return dto;
 	}
+	
+
 }

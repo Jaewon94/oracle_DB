@@ -11,7 +11,7 @@ import java.sql.Date;
   		);
  */
 
-public class ProductDTO {
+public class ProductDTO implements Comparable<ProductDTO> {
 	private int idx;
 	private String name;
 	private int price;
@@ -74,5 +74,11 @@ public class ProductDTO {
 	@Override
 	public String toString() {
 		return String.format("(%d) %s %,d원 %s까지 [%s]", idx, name, price, expiryDate, memo);
+	}
+
+	@Override
+	public int compareTo(ProductDTO o) {
+		
+		return this.price - o.price;
 	}
 }

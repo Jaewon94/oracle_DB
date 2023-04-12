@@ -29,9 +29,14 @@ public class ProductDAO {	// DAO (Database Access Object
 		}
 	}
 	
-	public ArrayList<ProductDTO> selectAll() {
+	public ArrayList<ProductDTO> selectAll(String order, boolean desc) {
 		ArrayList<ProductDTO> list = new ArrayList<ProductDTO>();
-		String sql ="select * from product order by idx";
+		String sql ="select * from product order by "+order;
+		
+		if(desc) {
+			sql += " desc";
+		}
+		System.out.println("SQL > " + sql);
 		// conn -> pstmt -> rs -> while -> list.add(ob) -> close(열린것 전부) -> return
 		
 		try {
@@ -117,7 +122,14 @@ public class ProductDAO {	// DAO (Database Access Object
 			pstmt = conn.prepareStatement(sql);
 			pstmt.setInt(1, idx);
 			
+
+//			conn.setAutoCommit(false);  해당 연결의 자동 커밋을 수행하지 않게 한다.
+//										jdbc의 오토 커밋 기본값은 true이다.
 			row = pstmt.executeUpdate();
+			
+			// 끝나기 전에 롤백을 해서 데이터가 안사라짐
+//			conn.commit();
+//			conn.rollback();		// conn에서 커밋을 수행하거나 롤백을 수행 할 수 도 있다.
 		} catch (SQLException e) {
 			System.out.println("delete 예외 : " +e);
 		} finally {
@@ -129,4 +141,44 @@ public class ProductDAO {	// DAO (Database Access Object
 		
 		return row;
 	}
+
+	public int update(ProductDTO dto) {
+		int row = 0;
+		
+		String sql = "update product set name =?, price =?, expiryDate=?,memo=? where idx = ?";
+		try {
+			conn =DriverManager.getConnection(url, user, password);
+			pstmt = conn.prepareStatement(sql);
+			pstmt.setString(1, dto.getName());
+			pstmt.setInt(2, dto.getPrice());
+			pstmt.setDate(3, dto.getExpiryDate());
+			pstmt.setString(4, dto.getMemo());
+			pstmt.setInt(5, dto.getIdx());
+			row = pstmt.executeUpdate();
+		} catch (SQLException e) {
+			System.out.println("update 예외 :" + e);
+		} finally {
+			try { if(rs != null) rs.close(); } catch (Exception e) {}
+			try { if(pstmt != null) pstmt.close(); } catch (Exception e) {}
+			try { if(conn != null) conn.close(); } catch (Exception e) {}
+		}
+		
+		return row;
+	}
+
+	public int deleteAll() {
+		int row =0;
+		String sql = "delete from product";
+		try {
+			conn = DriverManager.getConnection(url, user, password);
+			pstmt = conn.prepareStatement(sql);
+			row = pstmt.executeUpdate();
+			
+		} catch (SQLException e) {
+			System.out.println("deleteAll 예외 : "+e);
+		}
+		return row;
+	}
+	
+	
 }
